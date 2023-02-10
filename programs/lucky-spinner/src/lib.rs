@@ -159,7 +159,7 @@ pub mod lucky_spinner {
                     authority: ctx.accounts.pda_authority.to_account_info(),
                 },
             )
-            .with_signer(&[&[&POOL_OWNER_PDA_SEED[..]]]),
+            .with_signer(&[&[&POOL_OWNER_PDA_SEED[..], &[pda_bump]]]),
             reward,
         )?;
 
@@ -173,7 +173,7 @@ pub mod lucky_spinner {
                     authority: ctx.accounts.pda_authority.to_account_info(),
                 },
             )
-            .with_signer(&[&[&POOL_OWNER_PDA_SEED[..]]]),
+            .with_signer(&[&[&POOL_OWNER_PDA_SEED[..], &[pda_bump]]]),
             usable_tax,
         )?;
 
@@ -187,7 +187,7 @@ pub mod lucky_spinner {
                     authority: ctx.accounts.pda_authority.to_account_info(),
                 },
             )
-            .with_signer(&[&[&POOL_OWNER_PDA_SEED[..]]]),
+            .with_signer(&[&[&POOL_OWNER_PDA_SEED[..], &[pda_bump]]]),
             burn,
         )?;
 
