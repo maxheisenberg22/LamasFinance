@@ -1,0 +1,23 @@
+[package]
+name = "jackpot-lottery"
+version = "0.1.0"
+description = "Created with Anchor"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "jackpot_lottery"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+
+[dependencies]
+anchor-lang = { version = "0.25", features = [ "init-if-needed" ] }
+anchor-spl = "0.25"
+sha3 = { version = "0.10", default-features = false }
+
+vrf-lib = { git = "https://github.com/LamasFinance/vrf-lib" }

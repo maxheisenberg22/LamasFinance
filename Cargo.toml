@@ -1,4 +1,5 @@
 [workspace]
 members = [
-	"programs/lucky-spinner"
+	"programs/lucky-spinner",
+	"programs/jackpot-lottery",
 ]

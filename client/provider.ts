@@ -11,6 +11,15 @@ export const OWNER = Keypair.fromSecretKey(
 	])
 );
 
+export const USER = Keypair.fromSecretKey(
+	new Uint8Array([
+		110, 128, 57, 164, 181, 133, 232, 44, 46, 235, 125, 109, 243, 64, 183, 72, 149, 34, 172, 38, 117, 157, 28,
+		204, 68, 174, 52, 224, 169, 60, 128, 144, 61, 106, 10, 143, 74, 13, 105, 232, 66, 196, 2, 178, 232, 158,
+		184, 66, 83, 195, 27, 17, 182, 180, 255, 136, 217, 112, 95, 160, 181, 201, 115, 198,
+	])
+);
+export const USER_TOKEN = 'FFVcqDZ9AQHwabV9ope7Jq3EaoPcZXJgsJLJWUUNTrk6';
+
 const opts = AnchorProvider.defaultOptions();
 export const provider = new AnchorProvider(
 	new Connection(URL, opts.preflightCommitment),
