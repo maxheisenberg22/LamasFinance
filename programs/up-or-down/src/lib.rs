@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use chainlink_solana as chainlink;
 
-declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
+declare_id!("JC5q9ywJmhvGiBTSG2hmfqeu4Ucp3f9hHtC1CNVZfSkm");
 
 #[program]
 pub mod up_or_down {
@@ -21,17 +21,25 @@ pub mod up_or_down {
             ctx.accounts.chainlink_program.to_account_info(),
             ctx.accounts.chainlink_feed.to_account_info(),
         )?;
-        // write the latest price to the program output
-        let decimal_print = Decimal::new(round.answer, u32::from(decimals));
-        msg!("{} price is {}", description, decimal_print);
+
+        let decimal = Decimal::new(round.answer, u32::from(decimals));
+        msg!("{} price is {}", description, decimal);
+        *ctx.accounts.decimal = decimal;
+
         Ok(())
     }
 }
 
 #[derive(Accounts)]
 pub struct Execute<'info> {
+    #[account(init, payer = user, space = 28)]
+    pub decimal: Account<'info, Decimal>,
+    #[account(mut)]
+    pub user: Signer<'info>,
+
     pub chainlink_feed: AccountInfo<'info>,
     pub chainlink_program: AccountInfo<'info>,
+    pub system_program: Program<'info, System>,
 }
 
 #[account]
