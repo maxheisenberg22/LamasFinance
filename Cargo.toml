@@ -3,4 +3,5 @@ members = [
 	"programs/lucky-spinner",
 	"programs/jackpot-lottery",
 	"programs/up-or-down",
+	"programs/price-predict",
 ]
