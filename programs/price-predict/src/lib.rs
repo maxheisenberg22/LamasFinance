@@ -17,6 +17,7 @@ type ProgramResult = Result<()>;
 
 const DECIMAL: u32 = 12;
 const DIVISOR: u32 = 1000;
+const PRECISION: u128 = 10000 * 100;
 const STATE_PDA_SEED: &[u8] = b"program_state";
 
 #[program]
@@ -30,7 +31,7 @@ pub mod price_predict {
         profit_tax_percentage: u32,
         tax_burn_percentage: u32,
         min_bet_amount: u64,
-        bonus_points: Vec<[u64; 2]>,
+        bonus_points: Vec<[u32; 2]>,
     ) -> ProgramResult {
         let mut bonus_points = bonus_points;
         // Sort descending
@@ -90,6 +91,7 @@ pub mod price_predict {
         ctx.accounts.program_state.stage = Stage::PredictStage as u8;
         ctx.accounts.program_state.round_result = ctx.accounts.round_result.key();
 
+        msg!("price_start: {}", price_start_stage);
         Ok(())
     }
 
@@ -128,8 +130,7 @@ pub mod price_predict {
             stake_amount,
         )?;
 
-        // TODO: emit!()
-
+        emit!(ctx.accounts.prediction.to_predict_event());
         Ok(())
     }
 
@@ -162,6 +163,7 @@ pub mod price_predict {
         ctx.accounts.round_result.unix_time_end_round = Clock::get()?.unix_timestamp as u64;
         ctx.accounts.program_state.stage = Stage::ComputeStage as u8;
 
+        msg!("price_end: {}", price_end_stage);
         Ok(())
     }
 
@@ -201,18 +203,18 @@ pub mod price_predict {
         let mut score = score_from_vec0(
             ctx.accounts.prediction.predict_vector0,
             ctx.accounts.round_result.result_vec0,
-        ) as u128;
+        );
 
         let time_before_finalize = ctx.accounts.round_result.unix_time_end_round
             - ctx.accounts.prediction.unix_time_predict;
         for [time, bonus_point] in bonus_points.iter().copied() {
-            if time_before_finalize >= time {
-                score += bonus_point as u128;
+            if time_before_finalize >= time as u64 {
+                score += bonus_point;
                 break;
             }
         }
 
-        let reward: u64 = score
+        let reward: u64 = (score as u128)
             .checked_mul(ctx.accounts.prediction.stake_amount as u128)
             .ok_or(GameError::IntegerOverflow)?
             .checked_mul(ctx.accounts.round_result.sum_stake)
@@ -268,6 +270,7 @@ pub mod price_predict {
             burn,
         )?;
 
+        emit!(ctx.accounts.prediction.to_claim_event(reward, tax, score));
         Ok(())
     }
 
@@ -318,13 +321,13 @@ pub mod price_predict {
 fn price_predict_to_vec0(price_start: u128, price_end: u128) -> Result<f64> {
     let vec0 = u32::try_from(
         price_end
-            .checked_mul(DIVISOR as u128)
+            .checked_mul(PRECISION as u128)
             .ok_or(GameError::IntegerMultiplyOverflow)?
             .div(price_start + price_end),
     )
     .map_err(|_| GameError::IntegerConvertOverflow)?;
 
-    Ok(vec0 as f64 * 100.0 / DIVISOR as f64)
+    Ok(vec0 as f64 * 100.0 / PRECISION as f64)
 }
 
 fn score_from_vec0(predict: f64, actual: f64) -> u32 {
@@ -349,9 +352,9 @@ mod test {
 
     #[test]
     fn score() {
-        let price_start = 22;
-        let actual_vec0 = price_predict_to_vec0(price_start, 30).unwrap();
-        for i in 22..=30 {
+        let price_start = 2800;
+        let actual_vec0 = price_predict_to_vec0(price_start, 3000).unwrap();
+        for i in 2880..=2920 {
             let vec0 = price_predict_to_vec0(price_start, i).unwrap();
             println!(
                 "{} => {:.4} => {}",

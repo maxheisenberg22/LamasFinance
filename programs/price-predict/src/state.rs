@@ -20,7 +20,7 @@ pub struct ProgramState {
     pub tax_burn_percentage: u32,
 
     /// ASSUMPTION: sorted, maximum 16 element
-    pub bonus_points: Vec<[u64; 2]>,
+    pub bonus_points: Vec<[u32; 2]>,
 
     pub stage: u8,
 }
@@ -30,7 +30,7 @@ impl ProgramState {
 		32 * 6 // Pubkey
 		+ 8 * 1 // u64
 		+ 4 * 2 // u32
-		+ 4 + (8 + 8) * 16 // Vec - assuming 16 element max
+		+ 4 + (4 + 4) * 16 // Vec - assuming 16 element max
 		+ 1 // u8
 		+ 256 // preserved
 		;
@@ -74,4 +74,44 @@ impl Prediction {
 		+ 8 * 3 // u64 or f64
 		+ 256 // preserved
 		;
+
+    pub fn to_predict_event(&self) -> UserPredictEvent {
+        UserPredictEvent {
+            owner: self.owner,
+            round_result: self.round_result,
+            unix_time_predict: self.unix_time_predict,
+            stake_amount: self.stake_amount,
+            predict_vector0: self.predict_vector0,
+        }
+    }
+
+    pub fn to_claim_event(&self, reward: u64, tax: u64, score: u32) -> UserClaimEvent {
+        UserClaimEvent {
+            owner: self.owner,
+            round_result: self.round_result,
+            stake_amount: self.stake_amount,
+            reward,
+            tax,
+            score,
+        }
+    }
+}
+
+#[event]
+pub struct UserPredictEvent {
+    pub owner: Pubkey,
+    pub round_result: Pubkey,
+    pub unix_time_predict: u64,
+    pub stake_amount: u64,
+    pub predict_vector0: f64,
+}
+
+#[event]
+pub struct UserClaimEvent {
+    pub owner: Pubkey,
+    pub round_result: Pubkey,
+    pub stake_amount: u64,
+    pub reward: u64,
+    pub tax: u64,
+    pub score: u32,
 }
