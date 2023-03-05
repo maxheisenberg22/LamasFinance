@@ -5,7 +5,7 @@ import { PricePredict, IDL } from '../idl/price_predict';
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 
 const PROGRAM_STATE_PDA_SEED = 'program_state';
-const PROGRAM_ID = 'AoqYRUAFsxWdRCu9dDWTjBVUhvC5fXd3LLgkecsYmzys';
+const PROGRAM_ID = 'FaeFfvd41M31wmg5cMH3eo9q8DHVNhnf3zW6ityG4ija';
 
 const DIVISOR = 1000; // use in percentage
 const DECIMAL = new BN('1000000000000', 10); // use when handling coin price
@@ -18,9 +18,9 @@ const CONFIG = {
 	CHAINLINK_FEED: new PublicKey('HgTtcbcmp5BeThax5AU8vg4VwK79qAvAKKFMs8txMLW6'),
 	CHAINLINK_PROGRAM: new PublicKey('HEvSKofvBgfaexv23kMabbYqxasxU3mQ4ibBMEmJWHny'),
 	// Token
-	MINT: '5Tbx8JfVbNFuKZQQGbRnKBXJ4PBYLULhkWr2L1U8zNPk',
-	POOL: 'EGnpx7AQmnJpYes8toKUKdKQSdQ1sKfWEpPDVctQPzby',
-	TREASURY: 'EaE44yMjAu9izStcrNZQbHgQYKMjZ1b9W9ggbbvfPYx2',
+	MINT: '9a7TwLHkA2AaJd9E7qsdhaTPhQL5wQ9VXYo7J2pXHixV',
+	POOL: '57ibTWgJJ7vRdQejVYWXTRYY7uPyo9zz6pE1LhjW42Kf',
+	TREASURY: '3gBfaqxVBh5ZYKv3RE544JZMq3yTogR1jZsRyYguWHMQ',
 };
 
 const program = new Program(IDL, PROGRAM_ID) as Program<PricePredict>;

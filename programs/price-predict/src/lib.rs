@@ -7,7 +7,7 @@ use std::{
     ops::Div,
 };
 
-declare_id!("AoqYRUAFsxWdRCu9dDWTjBVUhvC5fXd3LLgkecsYmzys");
+declare_id!("FaeFfvd41M31wmg5cMH3eo9q8DHVNhnf3zW6ityG4ija");
 
 mod account;
 mod error;
