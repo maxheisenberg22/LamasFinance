@@ -54,6 +54,36 @@ pub mod price_predict {
         Ok(())
     }
 
+    pub fn re_init(
+        ctx: Context<ReInit>,
+        chainlink_program: Pubkey,
+        chainlink_feed: Pubkey,
+        profit_tax_percentage: u32,
+        tax_burn_percentage: u32,
+        min_bet_amount: u64,
+        bonus_points: Vec<[u32; 2]>,
+    ) -> ProgramResult {
+        let mut bonus_points = bonus_points;
+        // Sort descending
+        bonus_points.sort_unstable_by_key(|v| std::cmp::Reverse(v[0]));
+
+        *ctx.accounts.program_state = ProgramState {
+            mint: ctx.accounts.mint.key(),
+            treasury: ctx.accounts.treasury.key(),
+            chainlink_program,
+            chainlink_feed,
+            profit_tax_percentage,
+            tax_burn_percentage,
+            min_bet_amount,
+            bonus_points,
+            round_result: Pubkey::default(),
+            stage: Stage::WaitNextRound as u8,
+            ..(*ctx.accounts.program_state)
+        };
+
+        Ok(())
+    }
+
     pub fn next_round(ctx: Context<NextRound>) -> ProgramResult {
         require!(
             ctx.accounts.program_state.stage == Stage::WaitNextRound as u8,

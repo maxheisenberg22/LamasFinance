@@ -20,6 +20,19 @@ pub struct Init<'info> {
 }
 
 #[derive(Accounts)]
+pub struct ReInit<'info> {
+    #[account(mut, constraint = owner.key() == program_state.owner @ GameError::InvalidOwner)]
+    pub owner: Signer<'info>,
+    #[account(mut, seeds = [STATE_PDA_SEED], bump)]
+    pub program_state: Account<'info, ProgramState>,
+    pub mint: Account<'info, Mint>,
+    #[account(mut, constraint = treasury.mint == mint.key() @ GameError::ViolatedTreasuryConstraint)]
+    pub treasury: Account<'info, TokenAccount>,
+
+    pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
 pub struct NextRound<'info> {
     #[account(mut, constraint = owner.key() == program_state.owner @ GameError::InvalidOwner)]
     pub owner: Signer<'info>,
