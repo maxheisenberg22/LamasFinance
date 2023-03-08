@@ -7,7 +7,7 @@ use std::{
     ops::Div,
 };
 
-declare_id!("FaeFfvd41M31wmg5cMH3eo9q8DHVNhnf3zW6ityG4ija");
+declare_id!("SqFtqbsedB3HVwYd89wxTwL4UXV5JASq3JoPcApjNMJ");
 
 mod account;
 mod error;
@@ -90,6 +90,11 @@ pub mod price_predict {
             GameError::InvalidStage
         );
 
+        let desc = chainlink::description(
+            ctx.accounts.chainlink_program.to_account_info(),
+            ctx.accounts.chainlink_feed.to_account_info(),
+        )?;
+
         let price_start_stage = {
             let round = chainlink::latest_round_data(
                 ctx.accounts.chainlink_program.to_account_info(),
@@ -121,7 +126,7 @@ pub mod price_predict {
         ctx.accounts.program_state.stage = Stage::PredictStage as u8;
         ctx.accounts.program_state.round_result = ctx.accounts.round_result.key();
 
-        msg!("price_start: {}", price_start_stage);
+        msg!("price_start: {} {}", desc, price_start_stage);
         Ok(())
     }
 
@@ -145,6 +150,7 @@ pub mod price_predict {
                 ctx.accounts.round_result.price_start_stage,
                 predict_price,
             )?,
+            predict_price,
         };
 
         msg!("Transfering stake to pool");
@@ -170,6 +176,11 @@ pub mod price_predict {
             GameError::InvalidStage
         );
 
+        let desc = chainlink::description(
+            ctx.accounts.chainlink_program.to_account_info(),
+            ctx.accounts.chainlink_feed.to_account_info(),
+        )?;
+
         let price_end_stage = {
             let round = chainlink::latest_round_data(
                 ctx.accounts.chainlink_program.to_account_info(),
@@ -193,7 +204,7 @@ pub mod price_predict {
         ctx.accounts.round_result.unix_time_end_round = Clock::get()?.unix_timestamp as u64;
         ctx.accounts.program_state.stage = Stage::ComputeStage as u8;
 
-        msg!("price_end: {}", price_end_stage);
+        msg!("price_end: {} {}", desc, price_end_stage);
         Ok(())
     }
 
@@ -253,7 +264,11 @@ pub mod price_predict {
             .try_into()
             .map_err(|_| GameError::IntegerConvertOverflow)?;
 
-        let tax = reward * profit_tax_percentage as u64 / DIVISOR as u64;
+        let profit = reward
+            .checked_sub(ctx.accounts.prediction.stake_amount)
+            .unwrap_or(0);
+
+        let tax = profit * profit_tax_percentage as u64 / DIVISOR as u64;
         let burn = tax * tax_burn_percentage as u64 / DIVISOR as u64;
         let reward = reward - tax;
         let usable_tax = tax - burn;

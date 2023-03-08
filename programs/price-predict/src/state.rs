@@ -66,13 +66,15 @@ pub struct Prediction {
     pub unix_time_predict: u64,
     pub stake_amount: u64,
     pub predict_vector0: f64,
+    pub predict_price: u128,
 }
 
 impl Prediction {
     pub const SPACE: usize =
 		32 * 2 // Pubkey
 		+ 8 * 3 // u64 or f64
-		+ 256 // preserved
+		+ 16
+		+ 240 // preserved
 		;
 
     pub fn to_predict_event(&self) -> UserPredictEvent {

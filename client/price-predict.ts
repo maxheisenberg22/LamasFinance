@@ -5,22 +5,23 @@ import { PricePredict, IDL } from '../idl/price_predict';
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 
 const PROGRAM_STATE_PDA_SEED = 'program_state';
-const PROGRAM_ID = 'FaeFfvd41M31wmg5cMH3eo9q8DHVNhnf3zW6ityG4ija';
+const PROGRAM_ID = 'SqFtqbsedB3HVwYd89wxTwL4UXV5JASq3JoPcApjNMJ';
 
 const DIVISOR = 1000; // use in percentage
 const DECIMAL = new BN('1000000000000', 10); // use when handling coin price
 
 const CONFIG = {
 	TAX_PERCENTAGE: 0.01 * DIVISOR,
-	BURN_PERCENTAGE: 0.5 * DIVISOR,
-	MIN_BET_AMOUNT: 1 * LAMPORTS_PER_SOL,
+	BURN_PERCENTAGE: 0 * DIVISOR,
+	MIN_BET_AMOUNT: 5 * LAMPORTS_PER_SOL,
 	// Keys
-	CHAINLINK_FEED: new PublicKey('HgTtcbcmp5BeThax5AU8vg4VwK79qAvAKKFMs8txMLW6'),
+	CHAINLINK_FEED_BTC: new PublicKey('HgTtcbcmp5BeThax5AU8vg4VwK79qAvAKKFMs8txMLW6'),
+	CHAINLINK_FEED_SOL: new PublicKey('HgTtcbcmp5BeThax5AU8vg4VwK79qAvAKKFMs8txMLW6'),
 	CHAINLINK_PROGRAM: new PublicKey('HEvSKofvBgfaexv23kMabbYqxasxU3mQ4ibBMEmJWHny'),
-	// Token
-	MINT: '9a7TwLHkA2AaJd9E7qsdhaTPhQL5wQ9VXYo7J2pXHixV',
-	POOL: '57ibTWgJJ7vRdQejVYWXTRYY7uPyo9zz6pE1LhjW42Kf',
-	TREASURY: '3gBfaqxVBh5ZYKv3RE544JZMq3yTogR1jZsRyYguWHMQ',
+	// Token USDC
+	MINT: 'HEy1zzM3LFUFy8TbHEoEKQMYmPx1Uz3o51RZYRqCtDrs',
+	POOL: 'DpyhWQyaS9VnJGrpqafTbyob57c7yGE6NpSSqbZMXS5r',
+	TREASURY: 'B6hikziEgjWQtU24a2Z5hE1gX2SBA6JkYnUnKpvCSWtr',
 };
 
 const program = new Program(IDL, PROGRAM_ID) as Program<PricePredict>;
@@ -32,7 +33,7 @@ async function init() {
 	const tx = await program.methods
 		.init(
 			CONFIG.CHAINLINK_PROGRAM,
-			CONFIG.CHAINLINK_FEED,
+			CONFIG.CHAINLINK_FEED_SOL,
 			CONFIG.TAX_PERCENTAGE,
 			CONFIG.BURN_PERCENTAGE,
 			new BN(CONFIG.MIN_BET_AMOUNT),
@@ -93,8 +94,7 @@ async function predict() {
 	});
 
 	const logs = trans?.meta?.logMessages;
-	if (!logs)
-	{
+	if (!logs) {
 		console.log('Trans has no log', tx, trans);
 		return;
 	}
@@ -106,7 +106,6 @@ async function predict() {
 
 async function claim() {
 	const state = await program.account.programState.fetch(PROGRAM_STATE, 'confirmed');
-	const round = await program.account.roundResult.fetch(state.roundResult, 'confirmed');
 
 	const predictions = await program.account.prediction.all([
 		{
@@ -121,26 +120,29 @@ async function claim() {
 	for (const prediction of predictions) {
 		console.log(
 			`Claiming ${prediction.publicKey.toBase58()}` +
-			`\tround=${prediction.account.roundResult.toBase58()}` +
-			`\ttime=${new Date(prediction.account.unixTimePredict.toNumber() * 1000)}` +
-			`\tstake=${prediction.account.stakeAmount.toString(10)}` +
-			`\tvec0=${prediction.account.predictVector0.toString(10)}`
+			`\n\tround=${prediction.account.roundResult.toBase58()}` +
+			`\n\ttime=${new Date(prediction.account.unixTimePredict.toNumber() * 1000)}` +
+			`\n\tstake=${prediction.account.stakeAmount.toString(10)}` +
+			`\n\tvec0=${prediction.account.predictVector0.toString(10)}` +
+			`\n\tpredictPrice=${prediction.account.predictPrice.toString(10)}`
 		);
+
+		const round = await program.account.roundResult.fetch(prediction.account.roundResult, 'confirmed');
 
 		console.log('Executing...');
 		const tx = await program.methods.claimReward(PROGRAM_STATE_BUMP).accounts({
 			user: USER.publicKey,
 			userToken: USER_TOKEN,
 			programState: PROGRAM_STATE,
-			roundResult: state.roundResult,
+			roundResult: prediction.account.roundResult,
 			prediction: prediction.publicKey,
 			mint: state.mint,
 			pool: round.pool,
 			treasury: state.treasury,
 			tokenProgram: TOKEN_PROGRAM_ID,
 		})
-		.signers([USER])
-		.rpc({ commitment: 'confirmed' });
+			.signers([USER])
+			.rpc({ commitment: 'confirmed' });
 
 		console.log('Fetching transaction logs...');
 		const trans = await provider.connection.getTransaction(tx, {
@@ -148,8 +150,7 @@ async function claim() {
 		});
 
 		const logs = trans?.meta?.logMessages;
-		if (!logs)
-		{
+		if (!logs) {
 			console.log('Trans has no log', tx, trans);
 			continue;
 		}
@@ -173,7 +174,7 @@ async function next() {
 			roundResult: roundResult.publicKey,
 			mint: CONFIG.MINT,
 			pool: pool.publicKey,
-			chainlinkFeed: CONFIG.CHAINLINK_FEED,
+			chainlinkFeed: CONFIG.CHAINLINK_FEED_SOL,
 			chainlinkProgram: CONFIG.CHAINLINK_PROGRAM,
 			tokenProgram: TOKEN_PROGRAM_ID,
 			systemProgram: SystemProgram.programId,
