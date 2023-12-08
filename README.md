@@ -16,10 +16,10 @@
 
 I can hereby attest that the provided information is accurate and the token is valid.
 
-[x] Mint address: LMFzmYL6y1FX8HsEmZ6yNKNzercBmtmpg2ZoLwuUboU  
-[x] Symbol: LMF  
-[x] Token Decimals: 9  
-[x] Token icon: https://www.lamas.co/resource/lmf_token.png  
-[x] On-chain metadata matches  
-[x] No duplication on Jupiter's strict list  
-[x] Coingecko URL: https://www.coingecko.com/en/coins/lamas-finance  
+- [x] Mint address: LMFzmYL6y1FX8HsEmZ6yNKNzercBmtmpg2ZoLwuUboU  
+- [x] Symbol: LMF  
+- [x] Token Decimals: 9  
+- [x] Token icon: https://www.lamas.co/resource/lmf_token.png  
+- [x] On-chain metadata matches: https://solscan.io/token/LMFzmYL6y1FX8HsEmZ6yNKNzercBmtmpg2ZoLwuUboU  
+- [x] No duplication on Jupiter's strict list  
+- [x] Coingecko URL: https://www.coingecko.com/en/coins/lamas-finance  
