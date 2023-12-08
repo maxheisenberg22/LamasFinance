@@ -13,3 +13,13 @@
 - [x] My change matches the format in the file (no spaces between fields).
 - [x] My token is already live and trading on Jupiter.
 - [x] !!! I read the README section on Community-Driven Validation and understand this PR will be only be reviewed when there is community support on Twitter.
+
+I can hereby attest that the provided information is accurate and the token is valid.
+
+[x] Mint address: LMFzmYL6y1FX8HsEmZ6yNKNzercBmtmpg2ZoLwuUboU
+[x] Symbol: LMF
+[x] Token Decimals: 9
+[x] Token icon: https://www.lamas.co/resource/lmf_token.png
+[x] On-chain metadata matches
+[x] No duplication on Jupiter's strict list
+[x] Coingecko URL: https://www.coingecko.com/en/coins/lamas-finance
